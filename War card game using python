@@ -1,1 +1,144 @@
+from random import shuffle
+SUITE = 'H D S C'.split()
+RANKS = '2 3 4 5 6 7 8 9 10 J Q K A'.split()
+#
+# mycard = []
+# for r in SUITS:
+#     for s in RANKS:
+#         mycard.append((s, r))
+#
+
+class Deck:
+    '''
+    This is a deck card. This object will create a deck of cards to initiate play. You can then use this deck list of card
+    to split in half and give to the players. It will use SUITE and RANKS to create the deck. It should  also  have a method  for
+    splitting / cutting  the deck in half  and shuffling  the deck.
+    '''
+    def __init__(self):
+        print("Creating new ordered deck")
+        self.allcard = [(s, r) for s in SUITE for r in RANKS]
+
+    def shuffle(self):
+        print("Shuffling all cards")
+        shuffle(self.allcard)
+
+    def split_in_half(self):
+        return (self.allcard[:26], self.allcard[26:])
+
+class hand:
+    '''
+    This is the hand class, each player has a hand by which he/she can add or remove cards from that hand.
+     So, there should be an add or remove method here.
+     '''
+    def __init__(self, cards):
+        self.cards = cards
+
+    def __str__(self):
+        return "There are total {} cards".format(len(self.cards))
+
+    def add(self, added_cards):
+        self.cards.extend(added_cards)
+
+    def remove_card(self):
+        return self.cards.pop()
+
+class Player:
+    '''
+    This is a player class, which takes in a name and an instance of a Hand class object. The player can then play cards and
+    check if they still have card.
+    '''
+    def __init__(self, name, hand):
+        self.name = name
+        self.hand = hand
+
+    def play_card(self):
+        drawn_card = self.hand.remove_card()
+        print("{} has placed: {}".format(self.name, drawn_card))
+
+
+        print("\n")
+        return drawn_card
+
+    def remove_war_cards(self):
+        war_cards = []
+        if len(self.hand.cards) < 3:
+            return self.hand.cards
+        else:
+            for x in range(3):
+                war_cards.append(self.hand.cards.pop())
+                return war_cards
+
+    def still_has_cards(self):
+        """
+        This will return true if the player still has cards
+        """
+        return len(self.hand.cards) != 0
+
+
+
+
+###########################################
+###########################################
+###########################################
+#######GAME PLAY###########################
+###########################################
+###########################################
+
+print("Welcome to war, lets begin")
+
+#Create a new deck and split it in half
+
+d = Deck()
+d.shuffle()
+half1, half2 = d.split_in_half()
+
+# Create both players
+
+comp = Player("Computer", hand(half1))
+
+name = input("What is your name: ")
+
+user = Player(name, hand(half2))
+
+total_round = 0
+war_count = 0
+
+while user.still_has_cards() and comp.still_has_cards():
+    total_round = total_round + 1
+
+    print("Time for a new round")
+    print("here are the current standing")
+    print(user.name+ " has the count: "+str(len(user.hand.cards)))
+    print(comp.name+ " has the count: "+str(len(comp.hand.cards)))
+    print("Play a card")
+    print("\n")
+
+    table_card = []
+    c_card = comp.play_card()
+    p_card = user.play_card()
+
+    table_card.append(c_card)
+    table_card.append(p_card)
+
+    if c_card[1] == p_card[1]:
+        war_count = war_count + 1
+
+        print("war")
+
+        table_card.extend(user.remove_war_cards())
+        table_card.extend(comp.remove_war_cards())
+
+        if RANKS.index(c_card[1]) < RANKS.index(p_card[1]):
+            user.hand.add(table_card)
+
+        else:
+            comp.hand.add(table_card)
+    else:
+        if RANKS.index(c_card[1]) < RANKS.index(p_card[1]):
+            user.hand.add(table_card)
+
+        else:
+            comp.hand.add(table_card)
+print("game over, number of rounds: "+ str(total_round))
+print("a war happended " + str(war_count)+ " times")
 
